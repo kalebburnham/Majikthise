@@ -50,6 +50,14 @@ void oneKnightMoves(Board board, Move *moves) {
 	}
 }
 
+// This function should toggle the from/to bits instead.
+void makemove(Move move, Board *b) {
+	enum Square from = MOVE_FROM(move);
+	enum Square to = MOVE_TO(move);
+
+	*b = *b << to;
+}
+
 int main() { 
   Board knightboard = 0x800;
   
