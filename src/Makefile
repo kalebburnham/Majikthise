@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall
-DEPS = bitboard.h printer.h types.h conversion.h
-OBJ = main.o bitboard.o printer.o
+DEPS = types.h bitboard.h printer.h conversion.h movegen.h
+OBJ = main.o bitboard.o printer.o movegen.o
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
