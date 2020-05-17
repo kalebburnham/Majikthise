@@ -8,6 +8,10 @@
 
 void printBitboard(Board bitboard);
 
+void printMove(struct Move move);
+
 void printCBoard(struct CBoard board);
+
+void numToSquare(int n, char *sq);
 
 #endif // #ifndef PRINTER_INCLUDE
