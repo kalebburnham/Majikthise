@@ -6,6 +6,9 @@
 
 #include "types.h"
 
+#define WHITE_BOARD(b) (b.whitePawns | b.whiteKnights | b.whiteBishops | b.whiteRooks | b.whiteQueens | b.whiteKing)
+#define BLACK_BOARD(b) (b.blackPawns | b.blackKnights | b.blackBishops | b.blackRooks | b.blackQueens | b.blackKing)
+
 #define A_FILE 0x0101010101010101
 #define B_FILE 0x0202020202020202
 #define C_FILE 0x0404040404040404
@@ -28,30 +31,6 @@
 #define H1_A8_ANTIDIAGONAL 0x0102040810204080
 #define LIGHT_SQUARES 0x55AA55AA55AA55AA
 #define DARK_SQUARES 0xAA55AA55AA55AA55
-
-// move should be a 16 bit datatype
-// move should have 4 bits for a flag, 6 bits for the 'to' square,
-// followed by 6 bits for the 'from' square
-#define MOVE_FROM(move) (move & 0x3F)
-#define MOVE_TO(move) ((move >> 6) & 0x3F)
-#define MOVE_FLAG(move) ((move >> 12) & 0x3F)
-
-struct CBoard
-{
-   Board whitePawns;
-   Board whiteKnights;
-   Board whiteBishops;
-   Board whiteRooks;
-   Board whiteQueens;
-   Board whiteKing;
-
-   Board blackPawns;
-   Board blackKnights;
-   Board blackBishops;
-   Board blackRooks;
-   Board blackQueens;
-   Board blackKing;
-};
 
 struct CBoard generateBoard();
 
