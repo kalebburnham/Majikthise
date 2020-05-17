@@ -1,12 +1,15 @@
 #ifndef TYPES_INCLUDED
 #define TYPES_INCLUDED
 
-typedef uint64_t Board;
-typedef uint16_t Move;
+#include <stdint.h>
 
-enum Color {
-  WHITE, BLACK, COLOR_NB = 2
-};
+typedef uint64_t Board;
+
+enum bool { FALSE, TRUE };
+
+enum Color { WHITE, BLACK, COLOR_NB = 2 };
+
+enum Piece { P, N, B, R, Q, K };
 
 enum Square {
   SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1, SQ_G1, SQ_H1,
@@ -20,6 +23,54 @@ enum Square {
   SQ_NONE,
 
   SQUARE_NB = 64
+};
+
+enum Dir {
+  NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST
+};
+
+struct CBoard
+{
+  Board whitePawns;
+  Board whiteKnights;
+  Board whiteBishops;
+  Board whiteRooks;
+  Board whiteQueens;
+  Board whiteKing;
+
+  Board blackPawns;
+  Board blackKnights;
+  Board blackBishops;
+  Board blackRooks;
+  Board blackQueens;
+  Board blackKing;
+};
+
+struct Move {
+  unsigned int from:6;
+  unsigned int to:6;
+  unsigned int flag:4;
+};
+
+struct Position {
+  struct Position *parent;
+
+  struct CBoard board;
+  struct CBoard wAttacks;
+  struct CBoard bAttacks;
+
+  enum Color sideToMove;
+
+  enum bool wkCastle;
+  enum bool wqCastle;
+  enum bool bkCastle;
+  enum bool bqCastle;
+};
+
+struct PieceInfo {
+  enum Piece piece;
+  enum Color color;
+  enum Square sq;
 };
 
 #endif // TYPES_INCLUDED
