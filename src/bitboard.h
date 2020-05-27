@@ -9,6 +9,12 @@
 #define WHITE_BOARD(b) (b.whitePawns | b.whiteKnights | b.whiteBishops | b.whiteRooks | b.whiteQueens | b.whiteKing)
 #define BLACK_BOARD(b) (b.blackPawns | b.blackKnights | b.blackBishops | b.blackRooks | b.blackQueens | b.blackKing)
 
+/* BSF and BSR have undefined return values if their arguments
+are zero. */
+#define BSF(b) (__builtin_ctz(b))
+#define BSR(b) (__builtin_clz(b))
+#define POPCOUNT(b) (__builtin_popcount(b))
+
 #define A_FILE 0x0101010101010101
 #define B_FILE 0x0202020202020202
 #define C_FILE 0x0404040404040404
@@ -33,13 +39,5 @@
 #define DARK_SQUARES 0xAA55AA55AA55AA55
 
 struct CBoard generateBoard();
-
-/** Return number of 1-bits from a board */
-int populationCount(Board board);
-
-int bitScanForward(Board b);
-
-int multipleBitScanForward(Board b, int *list);
-
 
 #endif // ifndef BITBOARD_INCLUDED

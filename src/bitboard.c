@@ -19,36 +19,3 @@ struct CBoard generateBoard() {
 
 	return board;
 }
-
-/** Return number of 1-bits from a board.
-https://www.chessprogramming.org/Population_Count#BrianKernighansway
-*/
-int populationCount(Board board) {
-	int count = 0;
-    while (board) {
-        count++;
-        board &= board - 1; // reset LS1B
-    }
-    return count;
-}
-
-/* Returns the bit index of the LSB. 
-https://www.chessprogramming.org/BitScan#Index_of_LS1B_by_Popcount
-*/
-int bitScanForward(Board b) {
-    assert (b != 0);
-    return populationCount( (b & -b) - 1 );
-}
-
-/** 
-From https://www.chessprogramming.org/Bitboard_Serialization#Converting_Sets_to_Lists
-Returns the population count of the board.
-*/
-int multipleBitScanForward(Board b, int *list) {
-    if (b) do {
-        int idx = bitScanForward(b);
-        *list++ = idx;
-    } while (b &= b-1);
-    return populationCount(b);
-}
-

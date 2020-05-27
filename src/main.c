@@ -9,11 +9,6 @@
 
 #include <time.h>
 
-
-
-
-
-
 /* Creates a board representing all spaces occupied by Color c then
    isolates the bit-index sq. If this bit is a 1, a non-zero long
    unsigned int is returned which evaluates to true. If this space
@@ -60,13 +55,5 @@ int main() {
 
 	// Precompute ray tables
 	initRays();
-
-	Board knight;
-	knight = 1UL << 53;
-
-	int n = 8;
-	Board south_ray = rays[NORTH_WEST][58];
-	printBitboard(south_ray);
-
 	
 }

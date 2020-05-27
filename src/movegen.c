@@ -51,14 +51,14 @@ int knightMoves(Board board, struct Move *moves) {
 	// A knight has 8 potential moves.
     int to;
 
-	uint8_t from = bitScanForward(board);
+	uint8_t from = BSF(board);
 	Board to_board = knightAttacks(board);
 
     Board singles[8] = {0};
     int n = singularize(to_board, singles);
 
     for (int idx=0; idx < n; idx++) {
-        to = bitScanForward(singles[idx]);
+        to = BSF(singles[idx]);
         struct Move m = { .from=from, .to=to, .flag=0x00 };
         moves[idx] = m;
     }
@@ -71,7 +71,7 @@ int singularize(Board b, Board *singles) {
     int idx = 0;
 
     while (b) {
-        pos = bitScanForward(b);
+        pos = BSF(b);
         singles[idx++] = 1UL << pos;
         b ^= 1UL << pos;
     }
