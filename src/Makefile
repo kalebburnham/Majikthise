@@ -7,4 +7,8 @@ OBJ = main.o bitboard.o printer.o movegen.o rays.o
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 main: $(OBJ)
-	gcc $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
+
+clean:
+	rm -f $(OBJ)
+	rm main
