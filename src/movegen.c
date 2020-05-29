@@ -106,9 +106,9 @@ int generateKnightMoves(Board b, struct Move *moves) {
 
 }
 
-Board knightAttacks(Board board) {
-	Board to_board = noNoEa(board) | noEaEa(board) | soEaEa(board) | soSoEa(board) | noNoWe(board) | noWeWe(board) | soWeWe(board) | soSoWe(board);
-	return to_board;
+Board knightAttacks(enum Square sq) {
+    Board board = 1ULL << sq;
+	return noNoEa(board) | noEaEa(board) | soEaEa(board) | soSoEa(board) | noNoWe(board) | noWeWe(board) | soWeWe(board) | soSoWe(board);
 }
 
 /** Generate the moves for a board with a single knight. */

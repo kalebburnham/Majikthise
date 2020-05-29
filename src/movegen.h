@@ -26,6 +26,10 @@ Board bishopAttacks(enum Square sq, Board blockers);
 the given blockers. */
 Board rookAttacks(enum Square sq, Board blockers);
 
+/* Returns a board where 1-bits signal that square is attacked by a knight on
+the specified square. */
+Board knightAttacks(enum Square sq);
+
 /* Returns a board of the diagonal and straight-line attacks from the
 specified square with the given blockers. */
 Board queenAttacks(enum Square sq, Board blockers);
@@ -33,8 +37,6 @@ Board queenAttacks(enum Square sq, Board blockers);
 int generatePawnMoves(struct Position *pos, struct Move *moves);
 
 void generateMovesFromPos(struct Position *pos);
-
-Board knightAttacks(Board board);
 
 int knightMoves(Board board, struct Move *moves);
 
