@@ -4,8 +4,14 @@ CFLAGS = -Wall
 CCFLAGS=-Wall -Wextra -Wconversion -Wredundant-decls -Wshadow -Wno-unused-parameter -O3
 CC=gcc
 
-DEPS = ctest.h test_rays.h ../src/rays.h
-OBJ = main.o test_rays.o ../src/rays.o
+TESTDEPS = test_rays.h test_movegen.h
+TESTOBJ = test_rays.o test_movegen.o
+
+SRCDEPS = ../src/bitboard.h ../src/movegen.h ../src/printer.h ../src/rays.h
+SRCOBJ = ../src/bitboard.o ../src/movegen.o ../src/printer.o ../src/rays.o
+
+DEPS = ctest.h $(TESTDEPS) $(SRCDEPS)
+OBJ = main.o $(TESTOBJ) $(SRCOBJ)
 
 all: test
 

@@ -18,6 +18,18 @@ Board noEa(Board b);
 Board soWe(Board b);
 Board soEa(Board b);
 
+/* Returns a board of the diagonal attacks from the specified square with the
+given blockers. */
+Board bishopAttacks(enum Square sq, Board blockers);
+
+/* Returns a board of the straight-line attacks from the specified square with
+the given blockers. */
+Board rookAttacks(enum Square sq, Board blockers);
+
+/* Returns a board of the diagonal and straight-line attacks from the
+specified square with the given blockers. */
+Board queenAttacks(enum Square sq, Board blockers);
+
 int generatePawnMoves(struct Position *pos, struct Move *moves);
 
 void generateMovesFromPos(struct Position *pos);
