@@ -183,3 +183,45 @@ CTEST(knight_attacks, corner_of_board) {
     Board exp = 0x00000000A0100010;
     ASSERT_EQUAL(exp, knightAttacks(sq));
 }
+
+CTEST(king_attacks, center_of_board) {
+    /*
+    Square: C3
+
+    EXPECTED
+
+    00000000
+    00000000
+    00000000
+    00000000
+    01110000
+    01010000
+    01110000
+    00000000
+    */
+
+    enum Square sq = SQ_C3;
+    Board exp = 0x000000000E0A0E00;
+    ASSERT_EQUAL(exp, kingAttacks(sq));
+}
+
+CTEST(king_attacks, corner_of_board) {
+    /*
+    Square: H1
+
+    EXPECTED
+
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000011
+    00000010
+    */
+
+    enum Square sq = SQ_H1;
+    Board exp = 0xC040;
+    ASSERT_EQUAL(exp, kingAttacks(sq));
+}

@@ -34,6 +34,10 @@ Board knightAttacks(enum Square sq);
 specified square with the given blockers. */
 Board queenAttacks(enum Square sq, Board blockers);
 
+/* Returns a board where 1-bits signal that square is attacked by a king on
+the specified square. */
+Board kingAttacks(enum Square sq);
+
 int generatePawnMoves(struct Position *pos, struct Move *moves);
 
 void generateMovesFromPos(struct Position *pos);

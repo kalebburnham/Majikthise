@@ -81,6 +81,11 @@ Board queenAttacks(enum Square sq, Board blockers) {
 	return bishopAttacks(sq, blockers) | rookAttacks(sq, blockers);
 }
 
+Board kingAttacks(enum Square sq) {
+    Board b = 1ULL << sq;
+    return ((b << 1) & ~A_FILE) | ((b >> 1) & ~H_FILE) | b << 8 | b >> 8 | noWe(b) | noEa(b) | soWe(b) | soEa(b);
+}
+
 /* This needs to be modified if en passant is considered. */
 Board pawnAttacks(Board pawns, enum Color c) {
 	if (c == WHITE) {
