@@ -13,7 +13,7 @@
 /* BSF and BSR have undefined return values if their arguments
 are zero. */
 #define BSF(b) (__builtin_ctzll(b))
-#define BSR(b) (__builtin_clzll(b))
+#define BSR(b) (63 - __builtin_clzll(b))
 #define POPCOUNT(b) (__builtin_popcountll(b))
 
 #define A_FILE 0x0101010101010101
