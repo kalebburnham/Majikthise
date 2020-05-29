@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "rays.h"
 #include "types.h"
 
 #define WHITE_BOARD(b) (b.whitePawns | b.whiteKnights | b.whiteBishops | b.whiteRooks | b.whiteQueens | b.whiteKing)
@@ -11,9 +12,9 @@
 
 /* BSF and BSR have undefined return values if their arguments
 are zero. */
-#define BSF(b) (__builtin_ctz(b))
-#define BSR(b) (__builtin_clz(b))
-#define POPCOUNT(b) (__builtin_popcount(b))
+#define BSF(b) (__builtin_ctzll(b))
+#define BSR(b) (__builtin_clzll(b))
+#define POPCOUNT(b) (__builtin_popcountll(b))
 
 #define A_FILE 0x0101010101010101
 #define B_FILE 0x0202020202020202
