@@ -30,6 +30,8 @@ struct Position generateStartingPosition(struct CBoard board) {
 
 	pos.sideToMove = WHITE;
 
+	pos.halfmove_clock = 0;
+
 	pos.wkCastle = FALSE;
 	pos.wqCastle = FALSE;
 	pos.bkCastle = FALSE;

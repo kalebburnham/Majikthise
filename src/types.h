@@ -61,6 +61,8 @@ struct Position {
 
   enum Color sideToMove;
 
+  uint8_t halfmove_clock;
+
   enum bool wkCastle;
   enum bool wqCastle;
   enum bool bkCastle;
