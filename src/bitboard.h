@@ -7,7 +7,7 @@
 #include "rays.h"
 #include "types.h"
 
-#define WHITE_BOARD(b) (b.whitePawns | b.whiteKnights | b.whiteBishops | b.whiteRooks | b.whiteQueens | b.whiteKing)
+#define WHITE_BOARD(b) (w.whitePawns | w.whiteKnights | w.whiteBishops | w.whiteRooks | w.whiteQueens | w.whiteKing)
 #define BLACK_BOARD(b) (b.blackPawns | b.blackKnights | b.blackBishops | b.blackRooks | b.blackQueens | b.blackKing)
 
 /* BSF and BSR have undefined return values if their arguments
