@@ -1,3 +1,4 @@
 bin/
 *.o
-
+src/main
+tests/test
