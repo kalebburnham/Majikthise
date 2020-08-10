@@ -16,6 +16,9 @@ Board noEa(Board b) { return (b << 9) & ~A_FILE; }
 Board soWe(Board b) { return (b >> 9) & ~H_FILE; }
 Board soEa(Board b) { return (b >> 7) & ~A_FILE; }
 
+Board northOne(Board b) { return (b << 8); }
+Board southOne(Board b) { return (b >> 8); }
+
 /* Generate the possible bishop attacks using the classical approach. 
 This technique and code is copied with a small modification from 
 https://rhysre.net/2019/01/15/magic-bitboards.html */
@@ -97,6 +100,75 @@ Board pawnAttacks(Board pawns, enum Color c) {
 
 int generatePawnMoves(struct Position *pos, struct Move *moves) {
     return 1;
+}
+
+int wGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int numMoves = 0;
+	
+	Board occupied = WHITE_BOARD(board) | BLACK_BOARD(board);
+	Board toBoard = northOne(board.whitePawns) & ~occupied;
+	Board eligiblePawns = southOne(toBoard);
+
+	Board fromSingles[8] = {0};
+	Board toSingles[8] = {0};
+
+	int n = singularize(eligiblePawns, fromSingles);
+	singularize(toBoard, toSingles);
+
+	
+	for (int i=0; i < n; i++) {
+		from = BSF(fromSingles[i]);
+		to = BSF(toSingles[i]);
+		struct Move m = { .from=from, .to=to, .flag=0x00 };
+		
+		// Check for pawn moving to eigth rank
+		if (m.to < SQ_A8) {
+			moves[i] = m;
+			numMoves++;
+		}
+	}
+
+	return numMoves;
+}
+
+int wGenerateDoublePawnPush(struct Position *pos, struct Move *moves) {
+
+}
+
+int bGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int numMoves = 0;
+	
+	Board occupied = WHITE_BOARD(board) | BLACK_BOARD(board);
+	Board toBoard = southOne(board.blackPawns) & ~occupied;
+	Board eligiblePawns = northOne(toBoard);
+
+	Board fromSingles[8] = {0};
+	Board toSingles[8] = {0};
+
+	int n = singularize(eligiblePawns, fromSingles);
+	singularize(toBoard, toSingles);
+
+	for (int i=0; i < n; i++) {
+		from = BSF(fromSingles[i]);
+		to = BSF(toSingles[i]);
+		struct Move m = { .from=from, .to=to, .flag=0x00 };
+
+		// Check for pawn moving to first rank.
+		if (m.to > SQ_H1) {
+			moves[i] = m;
+			numMoves++;
+		}
+	}
+
+	return numMoves;
+}
+
+int bGenerateDoublePawnPush(struct Position *pos, struct Move *moves) {
+
 }
 
 void generateMovesFromPos(struct Position *pos) {

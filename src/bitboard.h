@@ -41,4 +41,6 @@ are zero. */
 
 struct CBoard generateBoard();
 
+struct CBoard generateEmptyBoard();
+
 #endif // ifndef BITBOARD_INCLUDED

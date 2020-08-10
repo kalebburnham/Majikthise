@@ -19,3 +19,23 @@ struct CBoard generateBoard() {
 
 	return board;
 }
+
+struct CBoard generateEmptyBoard() {
+	struct CBoard board;
+
+	board.whitePawns = 0;
+	board.whiteKnights = 0;
+	board.whiteBishops = 0;
+	board.whiteRooks = 0;
+	board.whiteQueens = 0;
+	board.whiteKing = 0;
+
+	board.blackPawns = 0;
+	board.blackKnights = 0;
+	board.blackBishops = 0;
+	board.blackRooks = 0;
+	board.blackQueens = 0;
+	board.blackKing = 0;
+
+	return board;
+}
