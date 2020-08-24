@@ -133,8 +133,33 @@ int wGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
 	return numMoves;
 }
 
-int wGenerateDoublePawnPush(struct Position *pos, struct Move *moves) {
+int wGenerateDoublePawnPushMoves(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int numMoves = 0;
 
+	Board occupied = WHITE_BOARD(board) | BLACK_BOARD(board);
+	// Eligible pawns are those on the second rank that can move forward two
+	// spaces without encountering an occupied square.
+	Board toBoard = northOne(northOne(SECOND_RANK & board.whitePawns) & ~occupied) & ~occupied;
+	Board eligiblePawns = southOne(southOne(toBoard));
+
+	Board fromSingles[8] = {0};
+	Board toSingles[8] = {0};
+
+	int n = singularize(eligiblePawns, fromSingles);
+	singularize(toBoard, toSingles);
+
+	for (int i=0; i < n; i++) {
+		from = BSF(fromSingles[i]);
+		to = BSF(toSingles[i]);
+		moves[i].from = from;
+		moves[i].to = to;
+		moves[i].flag = 0x01;
+		numMoves++;
+	}
+
+	return numMoves;
 }
 
 int bGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
@@ -167,8 +192,31 @@ int bGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
 	return numMoves;
 }
 
-int bGenerateDoublePawnPush(struct Position *pos, struct Move *moves) {
+int bGenerateDoublePawnPushMoves(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int numMoves = 0;
+	
+	Board occupied = WHITE_BOARD(board) | BLACK_BOARD(board);
+	Board toBoard = southOne(southOne(SEVENTH_RANK & board.blackPawns) & ~occupied) & ~occupied;
+	Board eligiblePawns = northOne(northOne(toBoard));
 
+	Board fromSingles[8] = {0};
+	Board toSingles[8] = {0};
+
+	int n = singularize(eligiblePawns, fromSingles);
+	singularize(toBoard, toSingles);
+
+	for (int i=0; i < n; i++) {
+		from = BSF(fromSingles[i]);
+		to = BSF(toSingles[i]);
+		moves[i].from = from;
+		moves[i].to = to;
+		moves[i].flag = 0x01;
+		numMoves++;
+	}
+
+	return numMoves;
 }
 
 void generateMovesFromPos(struct Position *pos) {

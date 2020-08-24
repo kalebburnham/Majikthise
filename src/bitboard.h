@@ -43,4 +43,6 @@ struct CBoard generateBoard();
 
 struct CBoard generateEmptyBoard();
 
+struct CBoard wIsInCheck();
+
 #endif // ifndef BITBOARD_INCLUDED

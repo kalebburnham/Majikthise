@@ -388,6 +388,12 @@ CTEST(pawnPushes, bPawnPush_Blockers) {
     struct Move move1 = { .from=SQ_C5, .to=SQ_C4, .flag=0 };
     struct Move exp[8] = {move1, emptyMove, emptyMove, emptyMove, emptyMove,
                           emptyMove, emptyMove, emptyMove};
+
+    for (int i=0; i < numMoves; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
 }
 
 CTEST(pawnPushes, bPawnPush_OnSecond) {
@@ -411,4 +417,115 @@ CTEST(pawnPushes, bPawnPush_OnSecond) {
     ASSERT_EQUAL(moves[0].flag, exp[0].flag);
 }
 
-// Need to test if moving pawn puts king in check?
+CTEST(pawnPushes, wDoublePawnPush_NoBlockers) {
+    /*
+    Place all white pawns on the second rank with no blockers. Verify they all
+    move to the fourth rank.
+    */
+    struct CBoard board = generateEmptyBoard();
+    board.whitePawns = SECOND_RANK;
+
+    struct Move moves[8] = {0};
+
+    struct Move exp[8] = { {.from=SQ_A2, .to=SQ_A4, .flag=0x01 },
+                           {.from=SQ_B2, .to=SQ_B4, .flag=0x01 },
+                           {.from=SQ_C2, .to=SQ_C4, .flag=0x01 },
+                           {.from=SQ_D2, .to=SQ_D4, .flag=0x01 },
+                           {.from=SQ_E2, .to=SQ_E4, .flag=0x01 },
+                           {.from=SQ_F2, .to=SQ_F4, .flag=0x01 },
+                           {.from=SQ_G2, .to=SQ_G4, .flag=0x01 },
+                           {.from=SQ_H2, .to=SQ_H4, .flag=0x01 }};
+
+    
+    int numMoves = wGenerateDoublePawnPushMoves(board, moves);
+
+    ASSERT_EQUAL(8, numMoves);
+    for (int i=0; i < 8; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST (pawnPushes, wDoublePawnPush_Blockers) {
+    /*
+    Place all white pawns on second rank. Put blockers on A3, B3, C4, and D4.
+    */
+    struct CBoard board = generateEmptyBoard();
+    board.whitePawns = SECOND_RANK;
+
+    // Blockers
+    board.blackPawns = 0x0C030000;
+
+    struct Move moves[8] = {0};
+
+    struct Move exp[8] = { {.from=SQ_E2, .to=SQ_E4, .flag=0x01 },
+                           {.from=SQ_F2, .to=SQ_F4, .flag=0x01 },
+                           {.from=SQ_G2, .to=SQ_G4, .flag=0x01 },
+                           {.from=SQ_H2, .to=SQ_H4, .flag=0x01 }};
+
+    int numMoves = wGenerateDoublePawnPushMoves(board, moves);
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i=0; i < numMoves; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(pawnPushes, bDoublePawnPush_NoBlockers) {
+    struct CBoard board = generateEmptyBoard();
+    board.blackPawns = SEVENTH_RANK;
+
+    struct Move moves[8] = {0};
+
+    struct Move exp[8] = { {.from=SQ_A7, .to=SQ_A5, .flag=0x01 },
+                           {.from=SQ_B7, .to=SQ_B5, .flag=0x01 },
+                           {.from=SQ_C7, .to=SQ_C5, .flag=0x01 },
+                           {.from=SQ_D7, .to=SQ_D5, .flag=0x01 },
+                           {.from=SQ_E7, .to=SQ_E5, .flag=0x01 },
+                           {.from=SQ_F7, .to=SQ_F5, .flag=0x01 },
+                           {.from=SQ_G7, .to=SQ_G5, .flag=0x01 },
+                           {.from=SQ_H7, .to=SQ_H5, .flag=0x01 }};
+
+    int numMoves = bGenerateDoublePawnPushMoves(board, moves);
+
+    ASSERT_EQUAL(8, numMoves);
+    for (int i=0; i < 8; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(pawnPushes, bDoublePawnPush_Blockers) {
+    /*
+    Place all black pawns on the seventh rank. Blockers are on C6 and E5.
+    */
+    struct CBoard board = generateEmptyBoard();
+    board.blackPawns = SEVENTH_RANK;
+
+    struct Move moves[8] = {0};
+
+    board.blackKnights = 0x4000040000000000;
+    board.whiteKnights = 0x1000000000;
+
+    struct Move exp[8] = { {.from=SQ_A7, .to=SQ_A5, .flag=0x01 },
+                           {.from=SQ_B7, .to=SQ_B5, .flag=0x01 },
+                           {.from=SQ_D7, .to=SQ_D5, .flag=0x01 },
+                           {.from=SQ_F7, .to=SQ_F5, .flag=0x01 },
+                           {.from=SQ_G7, .to=SQ_G5, .flag=0x01 },
+                           {.from=SQ_H7, .to=SQ_H5, .flag=0x01 }};
+
+    int numMoves = bGenerateDoublePawnPushMoves(board, moves);
+
+    ASSERT_EQUAL(6, numMoves);
+    for (int i=0; i < 8; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+// Need to test if moving pawn puts own king in check?

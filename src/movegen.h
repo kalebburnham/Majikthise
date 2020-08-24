@@ -49,9 +49,13 @@ Since pawns must promote on the eigth rank, do not include moves to the eighth.
 That is handled by wGeneratePawnPromotion. */
 int wGeneratePawnPushMoves(struct CBoard board, struct Move *moves);
 
+int wGenerateDoublePawnPushMoves(struct CBoard board, struct Move *moves);
+
 /* Generate all the black pawn push moves. The moves array should have size
 8. Return the number of moves generated. */
 int bGeneratePawnPushMoves(struct CBoard board, struct Move *moves);
+
+int bGenerateDoublePawnPushMoves(struct CBoard board, struct Move *moves);
 
 int knightMoves(Board board, struct Move *moves);
 
