@@ -4,6 +4,8 @@
 #include "../src/printer.h"
 #include "../src/rays.h"
 
+#include <time.h>
+
 CTEST(generateBoard, generateBoard) {
     struct CBoard b = generateBoard();
     ASSERT_EQUAL(0x81 , b.whiteRooks);
@@ -522,6 +524,459 @@ CTEST(pawnPushes, bDoublePawnPush_Blockers) {
 
     ASSERT_EQUAL(6, numMoves);
     for (int i=0; i < 8; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Captures, wGeneratePawnCaptures) {
+    /* B2 captures C3, E4 and G4 capture F5, D7 is not considered. */
+    struct CBoard board = generateEmptyBoard();
+
+    board.whitePawns = 1ULL << SQ_B2 | 1ULL << SQ_E4 | 1ULL << SQ_G4 | 1ULL << SQ_D7;
+    board.blackPawns = 1ULL << SQ_C3 | 1ULL << SQ_F5;
+    board.blackKing = 1ULL << SQ_E8;
+
+    struct Move moves[16] = {0};
+    int numMoves = wGeneratePawnCaptures(board, moves);
+
+    struct Move exp[3] = {{ .from=SQ_B2, .to=SQ_C3, .flag=0x04 },
+                          { .from=SQ_E4, .to=SQ_F5, .flag=0x04 },
+                          { .from=SQ_G4, .to=SQ_F5, .flag=0x04 }};
+
+    ASSERT_EQUAL(3, numMoves);
+    for (int i=0; i < 3; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, wGenerateEnPassantPawnMoves_Empty) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_E6;
+    
+    board.whitePawns = SECOND_RANK;
+    struct Move exp[2] = {0};
+
+    int numMoves = wGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(0, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, wGenerateEnPassantPawnMoves_A6) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_A6;
+    board.whitePawns = 1ULL << SQ_B5;
+
+    struct Move exp[2] = { { .from=SQ_B5, .to=SQ_A6, .flag=0x05 },
+                           { .from=0, .to=0, .flag=0 }};
+
+    int numMoves = wGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(1, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, wGenerateEnPassantPawnMoves_H6) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_H6;
+    board.whitePawns = 1ULL << SQ_G5;
+
+    struct Move exp[2] = { { .from=SQ_G5, .to=SQ_H6, .flag=0x05 },
+                           { .from=0, .to=0, .flag=0 }};
+
+    int numMoves = wGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(1, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, wGenerateEnPassantPawnMoves_C6) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_C6;
+    board.whitePawns = 1ULL << SQ_B5 | 1ULL << SQ_D5;
+
+    struct Move exp[2] = { { .from=SQ_B5, .to=SQ_C6, .flag=0x05 },
+                           { .from=SQ_D5, .to=SQ_C6, .flag=0x05 }};
+
+    int numMoves = wGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(2, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, bGenerateEnPassantPawnMoves_Empty) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_E3;
+    
+    board.blackPawns = SEVENTH_RANK;
+    struct Move exp[2] = {0};
+
+    int numMoves = wGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(0, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, bGenerateEnPassantPawnMoves_A3) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_A3;
+    board.whitePawns = 1ULL << SQ_B4;
+
+    struct Move exp[2] = { { .from=SQ_B4, .to=SQ_A3, .flag=0x05 },
+                           { .from=0, .to=0, .flag=0 }};
+
+    int numMoves = bGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(1, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, bGenerateEnPassantPawnMoves_H3) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_H3;
+    board.whitePawns = 1ULL << SQ_G4;
+
+    struct Move exp[2] = { { .from=SQ_G4, .to=SQ_H3, .flag=0x05 },
+                           { .from=0, .to=0, .flag=0 }};
+
+    int numMoves = bGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(1, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, bGenerateEnPassantPawnMoves_C3) {
+    struct Move moves[2] = {0};
+
+    struct CBoard board = generateEmptyBoard();
+    enum Square epTargetSquare = SQ_C3;
+    board.whitePawns = 1ULL << SQ_B4 | 1ULL << SQ_D4;
+
+    struct Move exp[2] = { { .from=SQ_B4, .to=SQ_C3, .flag=0x05 },
+                           { .from=SQ_D4, .to=SQ_C3, .flag=0x05 }};
+
+    int numMoves = bGenerateEnPassantPawnMoves(board, epTargetSquare, moves);
+
+    ASSERT_EQUAL(2, numMoves);
+    for (int i=0; i < 2; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(EnPassant, updateFlagEnPassant) {
+    enum Square epTargetSquare = SQ_C6;
+    struct Move moves[4] = {{ .from=SQ_F6, .to=SQ_C6, .flag=0x00 },
+                            { .from=SQ_F3, .to=SQ_C6, .flag=0x00 },
+                            { .from=SQ_B4, .to=SQ_C6, .flag=0x00 },
+                            { .from=SQ_E2, .to=SQ_E4, .flag=0x00 }};
+
+    updateFlagEnPassant(epTargetSquare, moves, 4);
+
+    struct Move exp[4] = {{ .from=SQ_F6, .to=SQ_C6, .flag=0x05 },
+                            { .from=SQ_F3, .to=SQ_C6, .flag=0x05 },
+                            { .from=SQ_B4, .to=SQ_C6, .flag=0x05 },
+                            { .from=SQ_E2, .to=SQ_E4, .flag=0x00 }};
+
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Promotion, wGeneratePawnPromotionMoves) {
+    /* Move white's pawn from E7 to E8 and generate all 4 promotions. */
+    struct CBoard board = generateEmptyBoard();
+    board.whitePawns = 1ULL << SQ_E7;
+    struct Move moves[4] = {0};
+    
+    int numMoves = wGeneratePawnPromotionMoves(board, moves);
+
+    struct Move exp[4] = {{ .from=SQ_E7, .to=SQ_E8, .flag=0x08 },
+                          { .from=SQ_E7, .to=SQ_E8, .flag=0x09 },
+                          { .from=SQ_E7, .to=SQ_E8, .flag=0x0A },
+                          { .from=SQ_E7, .to=SQ_E8, .flag=0x0B }};
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Promotion, wGeneratePawnPromotionMoves_Blocked) {
+    /* White's E7 pawn is blocked from advancing to E8 by the black king. */
+    struct CBoard board = generateEmptyBoard();
+    board.whitePawns = 1ULL << SQ_E7;
+    board.blackKing = 1ULL << SQ_E8;
+    struct Move moves[4] = {0};
+
+    int numMoves = wGeneratePawnPromotionMoves(board, moves);
+
+    struct Move exp[4] = {0};
+
+    ASSERT_EQUAL(0, numMoves);
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Promotion, bGeneratePawnPromotionMoves){
+    /* Move black's E2 pawn to E1 and generate all 4 promotions. */
+    struct CBoard board = generateEmptyBoard();
+    board.blackPawns = 1ULL << SQ_E2;
+    struct Move moves[4] = {0};
+    
+    int numMoves = bGeneratePawnPromotionMoves(board, moves);
+
+    struct Move exp[4] = {{ .from=SQ_E2, .to=SQ_E1, .flag=0x08 },
+                          { .from=SQ_E2, .to=SQ_E1, .flag=0x09 },
+                          { .from=SQ_E2, .to=SQ_E1, .flag=0x0A },
+                          { .from=SQ_E2, .to=SQ_E1, .flag=0x0B }};
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Promotion, bGeneratePawnPromotionMoves_Blocked) {
+    /* Black's E2 pawn is blocked from advancing to E1 by the white king. */
+    struct CBoard board = generateEmptyBoard();
+    board.whitePawns = 1ULL << SQ_E2;
+    board.blackKing = 1ULL << SQ_E1;
+    struct Move moves[4] = {0};
+
+    int numMoves = bGeneratePawnPromotionMoves(board, moves);
+
+    struct Move exp[4] = {0};
+
+    ASSERT_EQUAL(0, numMoves);
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+
+CTEST(Promotion, wGeneratePawnPromotionAndCaptureMoves) {
+    /* Use white's G7 pawn to capture black's rook on H8 and generate all promotions. */
+    struct CBoard board = generateEmptyBoard();
+    board.blackRooks = 1ULL << SQ_H8;
+    board.whitePawns = 1ULL << SQ_G7;
+
+    struct Move moves[56] = {0};
+
+    int numMoves = wGeneratePawnPromotionAndCaptureMoves(board, moves);
+
+    struct Move exp[4] = { { .from=SQ_G7, .to=SQ_H8, .flag=0x0C },
+                        { .from=SQ_G7, .to=SQ_H8, .flag=0x0D },
+                        { .from=SQ_G7, .to=SQ_H8, .flag=0x0E },
+                        { .from=SQ_G7, .to=SQ_H8, .flag=0x0F }};
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i=0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(Promotion, bGeneratePawnPromotionAndCaptureMoves) {
+    /* Use blacks's G2 and E2 pawn to capture white's bishop on F1 and generate all promotions. */
+    struct CBoard board = generateEmptyBoard();
+    board.blackPawns = 1ULL << SQ_G2 | 1ULL << SQ_E2;
+    board.whiteBishops = 1ULL << SQ_F1;
+
+    struct Move moves[56] = {0};
+
+    int numMoves = bGeneratePawnPromotionAndCaptureMoves(board, moves);
+
+    struct Move exp[8] = {{ .from=SQ_E2, .to=SQ_F1, .flag=0x0C },
+                          { .from=SQ_E2, .to=SQ_F1, .flag=0x0D },
+                          { .from=SQ_E2, .to=SQ_F1, .flag=0x0E },
+                          { .from=SQ_E2, .to=SQ_F1, .flag=0x0F },
+                          { .from=SQ_G2, .to=SQ_F1, .flag=0x0C },
+                          { .from=SQ_G2, .to=SQ_F1, .flag=0x0D },
+                          { .from=SQ_G2, .to=SQ_F1, .flag=0x0E },
+                          { .from=SQ_G2, .to=SQ_F1, .flag=0x0F }};
+
+    ASSERT_EQUAL(8, numMoves);
+    for (int i=0; i < 8; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(PawnMoves, wGenerateAllPawnMoves_StartingBoard) {
+    /* Generate all 16 pawn moves for white at the start of a game. 
+    The function wGenerateAllPawnMoves takes 600 +/- 50 seconds of CPU time to run 1000000 iterations. */
+    struct Move moves[122] = {0};
+    struct CBoard board = generateBoard();
+    struct Position pos = { .board=board };
+
+    int numMoves = wGenerateAllPawnMoves(&pos, moves);
+    ASSERT_EQUAL(16, numMoves);
+}
+
+CTEST(PawnMoves, bGenerateAllPawnMoves_StartingBoard) {
+    /* Generate all 16 pawn moves for white at the start of a game. 
+    The function wGenerateAllPawnMoves takes 600 +/- 50 seconds of CPU time to run 1000000 iterations. */
+    struct Move moves[122] = {0};
+    struct CBoard board = generateBoard();
+    struct Position pos = { .board=board };
+
+    int numMoves = bGenerateAllPawnMoves(&pos, moves);
+    ASSERT_EQUAL(16, numMoves);
+}
+
+CTEST(KnightMoves, wGenerateKnightMoves_StartingBoard) {
+    /* wGenerateKnightMoves takes 150 +/- 20 ms of CPU time to run 1000000 iterations*/
+    struct Move moves[4] = {0};
+    struct CBoard board = generateBoard();
+
+    int numMoves = wGenerateKnightMoves(board, moves);
+
+    struct Move exp[4] = {{ .from=SQ_B1, .to=SQ_A3, .flag=0x00 },
+                          { .from=SQ_B1, .to=SQ_C3, .flag=0x00 },
+                          { .from=SQ_G1, .to=SQ_F3, .flag=0x00 },
+                          { .from=SQ_G1, .to=SQ_H3, .flag=0x00 }};
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i = 0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(KnightMoves, wGenerateKnightMoves_MultipleCaptures) {
+    /* Knights on F3 and B3 capture D4. F3 knight captures G5.
+    F3 knight is blocked from moving to E5. */
+    struct Move moves[8] = {0};
+
+    struct CBoard board = generateBoard();
+    board.whiteKnights = 1ULL << SQ_B3 | 1ULL << SQ_F3;
+    // All pawns in starting position except E pawn.
+    board.whitePawns = (SECOND_RANK ^ (1ULL << SQ_E2)) | (1ULL << SQ_E5);
+    board.blackPawns = 1ULL << SQ_D4;
+    board.blackBishops = 1ULL << SQ_G5;
+
+    int numMoves = wGenerateKnightMoves(board, moves);
+
+    struct Move exp[8] = {{ .from=SQ_B3, .to=SQ_D4, .flag=0x04 },
+                          { .from=SQ_B3, .to=SQ_A5, .flag=0x00 },
+                          { .from=SQ_B3, .to=SQ_C5, .flag=0x00 },
+                          { .from=SQ_F3, .to=SQ_G1, .flag=0x00 },
+                          { .from=SQ_F3, .to=SQ_D4, .flag=0x04 },
+                          { .from=SQ_F3, .to=SQ_H4, .flag=0x00 },
+                          { .from=SQ_F3, .to=SQ_G5, .flag=0x04 }};
+
+    ASSERT_EQUAL(7, numMoves);
+    for (int i = 0; i < 7; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(KnightMoves, bGenerateKnightMoves_StartingBoard) {
+    struct Move moves[4] = {0};
+    struct CBoard board = generateBoard();
+
+    int numMoves = bGenerateKnightMoves(board, moves);
+
+    struct Move exp[4] = {{ .from=SQ_B8, .to=SQ_A6, .flag=0x00 },
+                          { .from=SQ_B8, .to=SQ_C6, .flag=0x00 },
+                          { .from=SQ_G8, .to=SQ_F6, .flag=0x00 },
+                          { .from=SQ_G8, .to=SQ_H6, .flag=0x00 }};
+
+    ASSERT_EQUAL(4, numMoves);
+    for (int i = 0; i < 4; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(KnightMoves, bGenerateKnightMoves_MultipleCaptures) {
+    /* Knights on F6 and B6 capture D5. F6 knight captures G4.
+    F6 knight is blocked from moving to G8. */
+    struct Move moves[8] = {0};
+
+    struct CBoard board = generateBoard();
+    board.blackKnights = 1ULL << SQ_F6 | 1ULL << SQ_B6;
+    board.blackRooks = (1ULL << SQ_A8) | (1ULL << SQ_G8);
+    board.whitePawns = 1ULL << SQ_D5;
+    board.whiteBishops = 1ULL << SQ_G4;
+
+    int numMoves = bGenerateKnightMoves(board, moves);
+
+    struct Move exp[8] = {{ .from=SQ_B6, .to=SQ_A4, .flag=0x00 },
+                          { .from=SQ_B6, .to=SQ_C4, .flag=0x00 },
+                          { .from=SQ_B6, .to=SQ_D5, .flag=0x04 },
+                          { .from=SQ_F6, .to=SQ_E4, .flag=0x00 },
+                          { .from=SQ_F6, .to=SQ_G4, .flag=0x04 },
+                          { .from=SQ_F6, .to=SQ_D5, .flag=0x04 },
+                          { .from=SQ_F6, .to=SQ_H5, .flag=0x00 }};
+
+    ASSERT_EQUAL(7, numMoves);
+    for (int i = 0; i < 7; i++) {
         ASSERT_EQUAL(exp[i].from, moves[i].from);
         ASSERT_EQUAL(exp[i].to, moves[i].to);
         ASSERT_EQUAL(exp[i].flag, moves[i].flag);

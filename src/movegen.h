@@ -39,7 +39,8 @@ Board queenAttacks(enum Square sq, Board blockers);
 the specified square. */
 Board kingAttacks(enum Square sq);
 
-int generatePawnMoves(struct Position *pos, struct Move *moves);
+int wGenerateAllPawnMoves(struct Position *pos, struct Move *moves);
+int bGenerateAllPawnMoves(struct Position *pos, struct Move *moves);
 
 void generateMovesFromPos(struct Position *pos);
 
@@ -61,7 +62,26 @@ int knightMoves(Board board, struct Move *moves);
 
 /* The returned int should the size of the moves array of non-zero
    values. The maximum number of knight moves per side is 16. */
-int generateKnightMoves(Board b, struct Move *moves);
+int wGenerateKnightMoves(struct CBoard b, struct Move *moves);
+int bGenerateKnightMoves(struct CBoard b, struct Move *moves);
+
+int wGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves);
+int bGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves);
+
+/* Generate non-En Passant pawn captures. Moves array should hold 16 Moves. */
+int wGeneratePawnCaptures(struct CBoard board, struct Move *moves);
+int bGeneratePawnCaptures(struct CBoard board, struct Move *moves);
+
+/* Generate pawn attacks during En Passant. The moves array should hold 2 Moves.  */
+int wGenerateEnPassantPawnMoves(struct CBoard board, enum Square epTargetSquare, struct Move *moves);
+int bGenerateEnPassantPawnMoves(struct CBoard board, enum Square epTargetSquare, struct Move *moves);
+
+int wGeneratePawnPromotionAndCaptureMoves(struct CBoard board, struct Move *moves);
+int bGeneratePawnPromotionAndCaptureMoves(struct CBoard board, struct Move *moves);
+
+/* Given a list of moves (and numMoves, the size of the array), loop through them
+set the move flag to En Passant if the To square matches epTargetSquare. */
+void updateFlagEnPassant(enum Square epTargetSquare, struct Move *moves, int numMoves);
 
 /* Given a bitboard of multiple 1-bits, return a pointer to a list of
    bitboards each with a single 1-bit. */

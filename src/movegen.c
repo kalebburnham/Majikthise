@@ -98,8 +98,60 @@ Board pawnAttacks(Board pawns, enum Color c) {
 	}
 }
 
-int generatePawnMoves(struct Position *pos, struct Move *moves) {
-    return 1;
+/* Moves array should have 122 open spots. */
+int wGenerateAllPawnMoves(struct Position *pos, struct Move *moves) {
+    struct Move singlePawnPushMoves[8] = {0};
+	struct Move doublePawnPushMoves[8] = {0};
+	struct Move pawnPromotions[32] = {0};
+	struct Move pawnPromotionAndCaptureMoves[56] = {0};
+	struct Move pawnCaptures[16] = {0};
+	struct Move enPassantCaptureMoves[2] = {0};
+
+	int numSinglePawnPushMoves = wGeneratePawnPushMoves(pos->board, singlePawnPushMoves);
+	int numDoublePawnPushMoves = wGenerateDoublePawnPushMoves(pos->board, doublePawnPushMoves);
+	int numPawnPromotionMoves = wGeneratePawnPromotionMoves(pos->board, pawnPromotions);
+	int numPawnPromotionAndCaptureMoves= wGeneratePawnPromotionAndCaptureMoves(pos->board, pawnPromotionAndCaptureMoves);
+	int numPawnCaptureMoves = wGeneratePawnCaptures(pos->board, pawnCaptures);
+	int numEnPassantCaptureMoves = wGenerateEnPassantPawnMoves(pos->board, pos->epTargetSquare, enPassantCaptureMoves);
+
+	int currIdx = 0;
+	for (int i=0; i < numSinglePawnPushMoves; i++) { moves[currIdx++] = singlePawnPushMoves[i]; }
+	for (int i=0; i < numDoublePawnPushMoves; i++) { moves[currIdx++] = doublePawnPushMoves[i]; }
+	for (int i=0; i < numPawnPromotionMoves; i++) { moves[currIdx++] = pawnPromotions[i]; }
+	for (int i=0; i < numPawnPromotionAndCaptureMoves; i++) { moves[currIdx++] = pawnPromotionAndCaptureMoves[i]; }
+	for (int i=0; i < numPawnCaptureMoves; i++) { moves[currIdx++] = pawnCaptures[i]; }
+	for (int i=0; i < numEnPassantCaptureMoves; i++) { moves[currIdx] = enPassantCaptureMoves[i]; }
+
+	// Return total number of moves.
+	return currIdx;
+}
+
+/* Moves array should have 122 open spots. */
+int bGenerateAllPawnMoves(struct Position *pos, struct Move *moves) {
+    struct Move singlePawnPushMoves[8] = {0};
+	struct Move doublePawnPushMoves[8] = {0};
+	struct Move pawnPromotions[32] = {0};
+	struct Move pawnPromotionAndCaptureMoves[56] = {0};
+	struct Move pawnCaptures[16] = {0};
+	struct Move enPassantCaptureMoves[2] = {0};
+
+	int numSinglePawnPushMoves = bGeneratePawnPushMoves(pos->board, singlePawnPushMoves);
+	int numDoublePawnPushMoves = bGenerateDoublePawnPushMoves(pos->board, doublePawnPushMoves);
+	int numPawnPromotionMoves = bGeneratePawnPromotionMoves(pos->board, pawnPromotions);
+	int numPawnPromotionAndCaptureMoves= bGeneratePawnPromotionAndCaptureMoves(pos->board, pawnPromotionAndCaptureMoves);
+	int numPawnCaptureMoves = bGeneratePawnCaptures(pos->board, pawnCaptures);
+	int numEnPassantCaptureMoves = bGenerateEnPassantPawnMoves(pos->board, pos->epTargetSquare, enPassantCaptureMoves);
+
+	int currIdx = 0;
+	for (int i=0; i < numSinglePawnPushMoves; i++) { moves[currIdx++] = singlePawnPushMoves[i]; }
+	for (int i=0; i < numDoublePawnPushMoves; i++) { moves[currIdx++] = doublePawnPushMoves[i]; }
+	for (int i=0; i < numPawnPromotionMoves; i++) { moves[currIdx++] = pawnPromotions[i]; }
+	for (int i=0; i < numPawnPromotionAndCaptureMoves; i++) { moves[currIdx++] = pawnPromotionAndCaptureMoves[i]; }
+	for (int i=0; i < numPawnCaptureMoves; i++) { moves[currIdx++] = pawnCaptures[i]; }
+	for (int i=0; i < numEnPassantCaptureMoves; i++) { moves[currIdx] = enPassantCaptureMoves[i]; }
+
+	// Return total number of moves.
+	return currIdx;
 }
 
 int wGeneratePawnPushMoves(struct CBoard board, struct Move *moves) {
@@ -224,11 +276,97 @@ void generateMovesFromPos(struct Position *pos) {
 }
 
 
+// Needs testing
+int wGenerateKnightMoves(struct CBoard b, struct Move *moves) {
+	enum Square from;
+	enum Square to;
+	int flag = 0x00;
+	int n = 0; // Number of moves
 
-int generateKnightMoves(Board b, struct Move *moves) {
+	if (b.whiteKnights == 0) { return 0; }
+
     Board knights[2] = {0};
-    singularize(b, knights);
+    singularize(b.whiteKnights, knights);
 
+	for (int i = 0; i < 2; i++) {
+		if (knights[i] == 0) {
+			continue;
+		}
+
+		enum Square currSquare = BSF(knights[i]);
+		from = currSquare;
+		Board attackedSquares = knightAttacks(currSquare);
+
+		Board attackedSquaresBoards[8];
+		int numAttackedSquares = singularize(attackedSquares, attackedSquaresBoards);
+
+		for (int j=0; j < numAttackedSquares; j++) {
+
+			if (attackedSquaresBoards[j] & WHITE_BOARD(b)) {
+				// The attacked square is occupied by a white piece.
+				continue;
+			}
+
+			to = BSF(attackedSquaresBoards[j]);
+
+			if (attackedSquaresBoards[j] & BLACK_BOARD(b)) {
+				flag = 0x04;
+			} else {
+				flag = 0x00;
+			}
+
+			struct Move m = { .from=from, .to=to, .flag=flag };
+			moves[n++] = m;
+		}
+	}
+
+	return n;
+}
+
+int bGenerateKnightMoves(struct CBoard b, struct Move *moves) {
+	enum Square from;
+	enum Square to;
+	int flag = 0x00;
+	int n = 0; // Number of moves
+
+	if (b.blackKnights == 0) { return 0; }
+
+	Board knights[2] = {0};
+	singularize(b.blackKnights, knights);
+
+	for (int i=0; i < 2; i++) {
+		if (knights[i] == 0) {
+			continue;
+		}
+
+		enum Square currSquare = BSF(knights[i]);
+		from = currSquare;
+		Board attackedSquares = knightAttacks(currSquare);
+
+		Board attackedSquaresBoards[8];
+		int numAttackedSquares = singularize(attackedSquares, attackedSquaresBoards);
+
+		for (int j=0; j < numAttackedSquares; j++) {
+
+			if (attackedSquaresBoards[j] & BLACK_BOARD(b)) {
+				// The attacked square is occupied by a white piece.
+				continue;
+			}
+
+			to = BSF(attackedSquaresBoards[j]);
+
+			if (attackedSquaresBoards[j] & WHITE_BOARD(b)) {
+				flag = 0x04;
+			} else {
+				flag = 0x00;
+			}
+
+			struct Move m = { .from=from, .to=to, .flag=flag };
+			moves[n++] = m;
+		}
+	}
+
+	return n;
 }
 
 Board knightAttacks(enum Square sq) {
@@ -254,6 +392,333 @@ int knightMoves(Board board, struct Move *moves) {
     }
 
     return n;
+}
+
+int wGeneratePawnCaptures(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int n = 0;
+
+	Board whitePawnBoards[16] = {0};
+	// Eight-rank pawn captures are handled in wGeneratePromotionAndCaptureMoves.
+	int numBoards = singularize((board.whitePawns & ~SEVENTH_RANK), whitePawnBoards);
+
+	for (int i=0; i < numBoards; i++) {
+		if ((noWe(whitePawnBoards[i]) & BLACK_BOARD(board)) > 0) {
+			from = BSF(whitePawnBoards[i]);
+			to = from + 7;
+			struct Move m = { .from=from, .to=to, .flag=0x04 };
+			moves[n] = m;
+			n++;
+		}
+		if ((noEa(whitePawnBoards[i]) & BLACK_BOARD(board)) > 0) {
+			from = BSF(whitePawnBoards[i]);
+			to = from + 9;
+			struct Move m = { .from=from, .to=to, .flag=0x04 };
+			moves[n] = m;
+			n++;
+		}
+	}
+
+	return n;
+}
+
+int bGeneratePawnCaptures(struct CBoard board, struct Move *moves) {
+	int from;
+	int to;
+	int n = 0;
+
+	Board blackPawnBoards[16] = {0};
+	// First-rank pawn captures are handled in bGeneratePromotionAndCaptureMoves.
+	int numBoards = singularize((board.blackPawns & ~SECOND_RANK), blackPawnBoards);
+
+	for (int i=0; i < numBoards; i++) {
+		if ((soWe(blackPawnBoards[i]) & WHITE_BOARD(board)) > 0) {
+			from = BSF(blackPawnBoards[i]);
+			to = from - 9;
+			struct Move m = { .from=from, .to=to, .flag=0x04 };
+			moves[n] = m;
+			n++;
+		}
+		if ((soEa(blackPawnBoards[i]) & WHITE_BOARD(board)) > 0) {
+			from = BSF(blackPawnBoards[i]);
+			to = from - 9;
+			struct Move m = { .from=from, .to=to, .flag=0x04 };
+			moves[n] = m;
+			n++;
+		}
+	}
+
+	return n;
+}
+
+int wGenerateEnPassantPawnMoves(struct CBoard board, enum Square epTargetSquare, struct Move *moves) {
+	int from;
+	int to;
+	int n = 0;
+
+	if (epTargetSquare == SQ_NONE) {
+		return 0;
+	}
+
+	if (epTargetSquare == SQ_A6) {
+		// The only square a white pawn can attack from is B5
+		if (board.whitePawns & (1ULL << SQ_B5)) {
+			from = SQ_B5;
+			to = SQ_A6;
+			struct Move m = { .from=from, .to=to, .flag=0x05 };
+			moves[0] = m;
+			n++;
+		}
+
+	} else if (epTargetSquare == SQ_H6) {
+		// The only square a white pawn can attack from is G5
+		if (board.whitePawns & (1ULL << SQ_G5)) {
+			from = SQ_G5;
+			to = SQ_H6;
+			struct Move m = { .from=from, .to=to, .flag=0x05 };
+			moves[0] = m;
+			n++;
+		}
+	} else {
+		// There are two potential 'attacking from' squares
+		if (board.whitePawns & (1ULL << (epTargetSquare-9))) {
+			from = (epTargetSquare-9);
+			to = epTargetSquare;
+			struct Move m = {.from=from, .to=to, .flag=0x05 };
+			moves[n] = m;
+			n++;
+		}
+
+		if (board.whitePawns & (1ULL << (epTargetSquare-7))) {
+			from = (epTargetSquare-7);
+			to = epTargetSquare;
+			struct Move m = {.from=from, .to=to, .flag=0x05 };
+			moves[n] = m;
+			n++;
+		}
+	}
+
+	return n;
+}
+
+int bGenerateEnPassantPawnMoves(struct CBoard board, enum Square epTargetSquare, struct Move *moves) {
+	int from;
+	int to;
+	int n = 0;
+
+	if (epTargetSquare == SQ_NONE) {
+		return 0;
+	}
+
+	if (epTargetSquare == SQ_A3) {
+		// The only square a white pawn can attack from is B4
+		if (board.whitePawns & (1ULL << SQ_B4)) {
+			from = SQ_B4;
+			to = SQ_A3;
+			struct Move m = { .from=from, .to=to, .flag=0x05 };
+			printf("%d", from);
+			moves[0] = m;
+			n++;
+		}
+
+	} else if (epTargetSquare == SQ_H3) {
+		// The only square a white pawn can attack from is G5
+		if (board.whitePawns & (1ULL << SQ_G4)) {
+			from = SQ_G4;
+			to = SQ_H3;
+			struct Move m = { .from=from, .to=to, .flag=0x05 };
+			moves[0] = m;
+			n++;
+		}
+	} else {
+		// There are two potential 'attacking from' squares
+		if (board.whitePawns & (1ULL << (epTargetSquare+7))) {
+			from = (epTargetSquare+7);
+			to = epTargetSquare;
+			struct Move m = {.from=from, .to=to, .flag=0x05 };
+			moves[n] = m;
+			n++;
+		}
+
+		if (board.whitePawns & (1ULL << (epTargetSquare+9))) {
+			from = (epTargetSquare+9);
+			to = epTargetSquare;
+			struct Move m = {.from=from, .to=to, .flag=0x05 };
+			moves[n] = m;
+			n++;
+		}
+	}
+
+	return n;
+}
+
+/* Moves array should have 32 positions. There are 8 moves from E7 to E8 with
+4 promotions each. */
+int wGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves) {
+	int n = 0;
+
+	if ((board.whitePawns & SEVENTH_RANK) == 0) {
+		return 0;
+	}
+
+	Board seventhRankPawns = board.whitePawns & SEVENTH_RANK;
+	Board seventhRankBoards[8] = {0};
+	int numSeventhRankPawns = singularize(seventhRankPawns, seventhRankBoards);
+
+	for (int i=0; i < numSeventhRankPawns; i++) {
+		if (northOne(seventhRankBoards[i]) & ~BLACK_BOARD(board)) {
+			int from = BSF(seventhRankBoards[i]);
+			int to = BSF(northOne(seventhRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x08 };
+			struct Move m1 = { .from=from, .to=to, .flag=0x09 };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0A };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0B };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+	}
+
+	return n;
+}
+
+/* Moves array should have 32 positions. There are 8 moves from ranks 7 to 8 with
+4 promotions each. */
+int bGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves) {
+	int n = 0;
+
+	if ((board.blackPawns & SECOND_RANK) == 0) {
+		return 0;
+	}
+
+	Board secondRankPawns = board.blackPawns & SECOND_RANK;
+	Board secondRankBoards[8] = {0};
+	int numSecondRankPawns = singularize(secondRankPawns, secondRankBoards);
+
+	for (int i=0; i < numSecondRankPawns; i++) {
+		if (southOne(secondRankBoards[i]) & ~WHITE_BOARD(board)) {
+			int from = BSF(secondRankBoards[i]);
+			int to = BSF(southOne(secondRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x08 };
+			struct Move m1 = { .from=from, .to=to, .flag=0x09 };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0A };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0B };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+	}
+
+	return n;
+}
+
+/* Moves array should have 56 positions. There are 14 advances to the eighth rank
+and 4 promotion types. */
+int wGeneratePawnPromotionAndCaptureMoves(struct CBoard board, struct Move *moves) {
+	int n = 0;
+
+	if ((board.whitePawns & SEVENTH_RANK) == 0) {
+		return 0;
+	}
+
+	Board seventhRankPawns = board.whitePawns & SEVENTH_RANK;
+	Board seventhRankBoards[8] = {0};
+	int numSeventhRankPawns = singularize(seventhRankPawns, seventhRankBoards);
+
+	for (int i=0; i < numSeventhRankPawns; i++) {
+		if (noWe(seventhRankBoards[i]) & BLACK_BOARD(board)) {
+
+			int from = BSF(seventhRankBoards[i]);
+			int to = BSF(noWe(seventhRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x0C };
+			struct Move m1 = { .from=from, .to=to, .flag=0x0D };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0E };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0F };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+		if (noEa(seventhRankBoards[i]) & BLACK_BOARD(board)) {
+			int from = BSF(seventhRankBoards[i]);
+			int to = BSF(noEa(seventhRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x0C };
+			struct Move m1 = { .from=from, .to=to, .flag=0x0D };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0E };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0F };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+	}
+
+	return n;
+}
+
+/* Moves array should have 56 positions. There are 14 advances to the eighth rank
+and 4 promotion types. */
+int bGeneratePawnPromotionAndCaptureMoves(struct CBoard board, struct Move *moves) {
+	int n = 0;
+
+	if ((board.blackPawns & SECOND_RANK) == 0) {
+		return 0;
+	}
+
+	Board secondRankPawns = board.blackPawns & SECOND_RANK;
+	Board secondRankBoards[8] = {0};
+	int numSecondRankPawns = singularize(secondRankPawns, secondRankBoards);
+
+	for (int i=0; i < numSecondRankPawns; i++) {
+		if (soWe(secondRankBoards[i]) & WHITE_BOARD(board)) {
+
+			int from = BSF(secondRankBoards[i]);
+			int to = BSF(soWe(secondRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x0C };
+			struct Move m1 = { .from=from, .to=to, .flag=0x0D };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0E };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0F };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+		if (soEa(secondRankBoards[i]) & WHITE_BOARD(board)) {
+			int from = BSF(secondRankBoards[i]);
+			int to = BSF(soEa(secondRankBoards[i]));
+			struct Move m0 = { .from=from, .to=to, .flag=0x0C };
+			struct Move m1 = { .from=from, .to=to, .flag=0x0D };
+			struct Move m2 = { .from=from, .to=to, .flag=0x0E };
+			struct Move m3 = { .from=from, .to=to, .flag=0x0F };
+			moves[n] = m0;
+			moves[n+1] = m1;
+			moves[n+2] = m2;
+			moves[n+3] = m3;
+			n = n + 4;
+		}
+	}
+
+	return n;
+}
+
+void updateFlagEnPassant(enum Square epTargetSquare, struct Move *moves, int numMoves) {
+	if (epTargetSquare == SQ_NONE) {
+		return;
+	}
+
+	for (int i = 0; i < numMoves; i++) {
+		if (moves[i].to == epTargetSquare) {
+			moves[i].flag = 0x05;
+		}
+	}
 }
 
 int singularize(Board b, Board *singles) {

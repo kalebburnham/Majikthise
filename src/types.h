@@ -67,6 +67,8 @@ struct Position {
   enum bool wqCastle;
   enum bool bkCastle;
   enum bool bqCastle;
+
+  enum Square epTargetSquare;
 };
 
 struct PieceInfo {
