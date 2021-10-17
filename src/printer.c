@@ -1,6 +1,7 @@
 #include "printer.h"
 
 void printBitboard(Board bitboard) {
+	putchar('\n');
 	for(int row=7; row>=0; row--){
 		for (int file=0; file < 8; file++) {
 			char c = ((bitboard >> (row*8+file)) & 1LL)? '1' : '0';

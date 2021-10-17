@@ -19,6 +19,88 @@ Board soEa(Board b) { return (b >> 7) & ~A_FILE; }
 Board northOne(Board b) { return (b << 8); }
 Board southOne(Board b) { return (b >> 8); }
 
+void generateMovesFromPos(struct Position *pos) {
+
+}
+
+void wGenerateAllMoves(struct Position *pos) {
+
+	if (pos->sideToMove == WHITE) {
+		struct Move wAllPawnMoves[122] = {0};
+		wGenerateAllPawnMoves(pos, wAllPawnMoves);
+		/*wGenerateAllBishopMoves();
+		wGenerateAllKnightMoves();
+		wGenerateAllRookMoves();
+		wGenerateAllQueenMoves();
+		wGenerateAllKingMoves();*/
+	} else {
+
+	}
+// Pawn moves
+// Pawn double moves
+// Pawn attacks
+// Pawn promotions
+
+// En Passant captures
+// Bishop moves/attacks
+// Knight moves/attacks
+// Rook moves/attacks
+// Queen moves/attacks
+// King moves/attacks
+}
+
+void bGenerateAllMoves() {
+
+}
+
+/* Moves array should be 13 * 2 Moves wide. 
+Returns the number of moves recorded in the moves array. */
+int wGenerateBishopMoves(struct CBoard b, struct Move *moves) {
+	Board bishopBitboards[2] = {0};
+	int n = singularize(b.whiteBishops, bishopBitboards);
+	
+	int movesIdx = 0;
+	enum Square fromSquare;
+	enum Square toSquare;
+	int flag;
+	// When multiple bishops are on the board, this stores the count of moves recorded
+	// by bishops already calculated. This helps keep count in the condition of the
+	// nested for loop.
+	int otherMovesSaved = 0; 
+
+	for (int i=0; i < n; i++) {
+		fromSquare = BSR(bishopBitboards[i]);
+		
+		Board blockers = (WHITE_BOARD(b) | BLACK_BOARD (b));
+		Board attackedSquares = bishopAttacks(fromSquare, blockers);
+		// Remove squares with white pieces.
+		attackedSquares &= ~(WHITE_BOARD(b));
+
+		int numAttackedSquares = POPCOUNT(attackedSquares);
+		for (movesIdx; movesIdx < otherMovesSaved + numAttackedSquares; movesIdx++) {
+			toSquare = BSF(attackedSquares);
+			attackedSquares &= ~(0x01ULL << toSquare);
+
+			if ((0x01ULL << toSquare) & BLACK_BOARD(b)) {
+				flag = 0x04;
+			} else {
+				flag = 0x00;
+			}
+
+			struct Move m = { .from=fromSquare, .to=toSquare, .flag=flag };
+			moves[movesIdx] = m;
+		}
+
+		otherMovesSaved += movesIdx;
+	}
+
+	return otherMovesSaved;
+}
+
+int bGenerateBishopMoves(struct CBoard b, struct Move *moves) {
+	return 1;
+}
+
 /* Generate the possible bishop attacks using the classical approach. 
 This technique and code is copied with a small modification from 
 https://rhysre.net/2019/01/15/magic-bitboards.html */
@@ -271,9 +353,7 @@ int bGenerateDoublePawnPushMoves(struct CBoard board, struct Move *moves) {
 	return numMoves;
 }
 
-void generateMovesFromPos(struct Position *pos) {
 
-}
 
 
 // Needs testing
@@ -721,6 +801,7 @@ void updateFlagEnPassant(enum Square epTargetSquare, struct Move *moves, int num
 	}
 }
 
+/* Given any bitboard, return a list of bitboards with only one piece per board. */
 int singularize(Board b, Board *singles) {
     int pos;
     int idx = 0;

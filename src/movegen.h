@@ -65,6 +65,10 @@ int knightMoves(Board board, struct Move *moves);
 int wGenerateKnightMoves(struct CBoard b, struct Move *moves);
 int bGenerateKnightMoves(struct CBoard b, struct Move *moves);
 
+int wGenerateBishopMoves(struct CBoard b, struct Move *moves);
+int bGenerateBishopMoves(struct CBoard b, struct Move *moves);
+
+
 int wGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves);
 int bGeneratePawnPromotionMoves(struct CBoard board, struct Move *moves);
 

@@ -41,7 +41,8 @@ CTEST(ray_generation, rays_north_west) {
 CTEST(ray_generation, rays_north_east) {
     initRays();
     enum Square sq = SQ_C4;
-    Board exp = 0x8040201000000000 >> 1;
+    //Board exp = 0x8040201000000000 >> 1;
+    Board exp = (A1_H8_DIAGONAL >> 1) & ~A_FILE & ~B_FILE & ~C_FILE;
     ASSERT_EQUAL(exp, rays[NORTH_EAST][sq]);
 }
 

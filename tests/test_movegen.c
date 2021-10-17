@@ -1,8 +1,10 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "ctest.h"
 #include "../src/movegen.h"
 #include "../src/printer.h"
 #include "../src/rays.h"
+#include "../src/sorters.h"
 
 #include <time.h>
 
@@ -75,6 +77,103 @@ CTEST(bishop_attacks, sq_a1_blocked) {
     Board blockers = 0x200;
     Board exp = 0x200;
     ASSERT_EQUAL(exp, bishopAttacks(sq, blockers));
+}
+
+CTEST(bishop_moves, wOneBishop_a1) {
+    /*
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    00000000
+    0p000000
+    B0000000
+    */
+
+
+    initRays();
+    struct Move emptyMove = { .from=0, .to=0, .flag=0 };
+    struct Move m = { .from=SQ_A1, .to=SQ_B2, .flag=0x04 };
+    struct CBoard board = generateEmptyBoard();
+
+    board.whiteBishops = 0x01ULL << SQ_A1;
+    board.blackPawns = 0x01ULL << SQ_B2;
+
+    struct Move moves[26] = {0};
+    wGenerateBishopMoves(board, moves);
+    
+
+    struct Move exp[26] = {m, emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                          emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                          emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                          emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                          emptyMove, emptyMove, emptyMove, emptyMove, emptyMove};
+
+    qsort(moves, 26, sizeof(struct Move), MoveComparatorNumericalDesc);
+    qsort(exp, 26, sizeof(struct Move), MoveComparatorNumericalDesc);
+    
+    for (int i=0; i < 26; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+
+}
+
+CTEST(bishop_moves, wOneBishop) {
+    /*
+    rnbkqbnr
+    poppoopp
+    opooppoo
+    oooBoooo
+    ooooPooo
+    oooooooo
+    PPPPoPPP
+    RNBKQoNR
+    */
+
+
+    initRays();
+    struct Move emptyMove = { .from=0, .to=0, .flag=0 };
+    struct Move m = { .from=SQ_A1, .to=SQ_B2, .flag=0x04 };
+    struct CBoard board = generateBoard();
+    struct Move moves[26] = {0};
+
+    board.whiteBishops = (0x01ULL << SQ_C1) | (0x01ULL << SQ_D5);
+    
+    board.whitePawns = (0x01ULL << SQ_A2) | (0x01ULL << SQ_B2) | (0x01ULL << SQ_C2) | (0x01ULL << SQ_D2) | (0x01ULL << SQ_E4) | (0x01ULL << SQ_F2) | (0x01ULL << SQ_G2) | (0x01ULL << SQ_H2);
+    board.blackPawns = (0x01ULL << SQ_A7) | (0x01ULL << SQ_B6) | (0x01ULL << SQ_C7) | (0x01ULL << SQ_D7) | (0x01ULL << SQ_E6) | (0x01ULL << SQ_F6) | (0x01ULL << SQ_G7) | (0x01ULL << SQ_H7);
+
+    wGenerateBishopMoves(board, moves);
+
+    struct Move exp[26] = { { .from=SQ_D5, .to=SQ_C4, .flag=0x00},
+                            { .from=SQ_D5, .to=SQ_B3, .flag=0x00},
+                            { .from=SQ_D5, .to=SQ_C6, .flag=0x00},
+                            { .from=SQ_D5, .to=SQ_B7, .flag=0x00},
+                            { .from=SQ_D5, .to=SQ_A8, .flag=0x04},
+                            { .from=SQ_D5, .to=SQ_E6, .flag=0x04},
+                            emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                            emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                            emptyMove, emptyMove, emptyMove, emptyMove, emptyMove,
+                            emptyMove, emptyMove, emptyMove, emptyMove, emptyMove};
+
+    qsort(moves, 26, sizeof(struct Move), MoveComparatorNumericalDesc);
+    qsort(exp, 26, sizeof(struct Move), MoveComparatorNumericalDesc);
+
+    for (int i=0; i < 26; i++) {
+        ASSERT_EQUAL(exp[i].from, moves[i].from);
+        ASSERT_EQUAL(exp[i].to, moves[i].to);
+        ASSERT_EQUAL(exp[i].flag, moves[i].flag);
+    }
+}
+
+CTEST(bishop_moves, wTwoBishops_1) {
+
+}
+
+CTEST(bishop_moves, wThreeBishops) {
+
 }
 
 CTEST(rook_attacks, sq_d3) {
